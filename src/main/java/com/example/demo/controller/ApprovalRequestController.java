@@ -26,4 +26,8 @@ public class ApprovalRequestController {
             @RequestParam(required = false) Long requesterId
     ) {
         if (requesterId != null) {
-            return
+            return approvalRequestService.getRequestsByRequester(requesterId);
+        }
+        return approvalRequestService.getAllRequests();
+    }
+}
