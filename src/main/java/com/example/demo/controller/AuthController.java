@@ -1,48 +1,34 @@
 package com.example.demo.controller;
 
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(UserService userService,
-                          PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/register")
-    public User register(@RequestBody Map<String, String> body) {
-        User user = new User();
-        user.setUsername(body.get("username"));
-        user.setEmail(body.get("email"));
-        user.setPassword(body.get("password"));
-
-        return userService.registerUser(user, body.get("role"));
+    public User register(@RequestBody User user,
+                         @RequestParam String role) {
+        return userService.registerUser(user, role);
     }
 
+   
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> body) {
-        User user = userService.findByUsername(body.get("username"));
+    public String login(@RequestBody User user) {
 
-        if (!passwordEncoder.matches(body.get("password"), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+        if (user.getUsername() == null || user.getPassword() == null) {
+            throw new UnauthorizedException("Invalid username or password");
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("username", user.getUsername());
-        response.put("roles", user.getRoles());
-
-        return response;
+        return "Login successful for user: " + user.getUsername();
     }
 }

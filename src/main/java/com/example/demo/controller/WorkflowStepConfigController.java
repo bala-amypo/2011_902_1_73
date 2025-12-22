@@ -10,19 +10,19 @@ import java.util.List;
 @RequestMapping("/api/steps")
 public class WorkflowStepConfigController {
 
-    private final WorkflowStepConfigService workflowStepConfigService;
+    private final WorkflowStepConfigService service;
 
-    public WorkflowStepConfigController(WorkflowStepConfigService workflowStepConfigService) {
-        this.workflowStepConfigService = workflowStepConfigService;
+    public WorkflowStepConfigController(WorkflowStepConfigService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public WorkflowStepConfig createStep(@RequestBody WorkflowStepConfig step) {
-        return workflowStepConfigService.createStep(step);
+    public WorkflowStepConfig create(@RequestBody WorkflowStepConfig step) {
+        return service.createStep(step);
     }
 
     @GetMapping("/template/{templateId}")
     public List<WorkflowStepConfig> getSteps(@PathVariable Long templateId) {
-        return workflowStepConfigService.getStepsForTemplate(templateId);
+        return service.getStepsForTemplate(templateId);
     }
 }
