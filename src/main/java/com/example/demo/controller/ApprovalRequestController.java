@@ -26,4 +26,3 @@ public class ApprovalRequestController {
         return service.getAllRequests();
     }
 }
-ApprovalController.java
