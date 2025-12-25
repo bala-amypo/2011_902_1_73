@@ -4,29 +4,32 @@ import com.example.demo.model.ApprovalRequest;
 import com.example.demo.repository.ApprovalRequestRepository;
 import com.example.demo.service.ApprovalRequestService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class ApprovalRequestServiceImpl implements ApprovalRequestService {
+    private final ApprovalRequestRepository requestRepository;
 
-    private final ApprovalRequestRepository repository;
-
-    public ApprovalRequestServiceImpl(ApprovalRequestRepository repository) {
-        this.repository = repository;
+    public ApprovalRequestServiceImpl(ApprovalRequestRepository requestRepository) {
+        this.requestRepository = requestRepository;
     }
 
-    public ApprovalRequest createRequest(ApprovalRequest request) {
-        request.setStatus("PENDING");
-        request.setCurrentLevel(1);
-        return repository.save(request);
+    @Override
+    public ApprovalRequest createRequest(ApprovalRequest req) {
+        if (req.getStatus() == null) req.setStatus("PENDING");
+        return requestRepository.save(req);
     }
 
+    @Override
+    public List<ApprovalRequest> getRequestsByRequester(Long userId) {
+        return requestRepository.findByRequesterId(userId);
+    }
+
+    @Override
     public List<ApprovalRequest> getAllRequests() {
-        return repository.findAll();
-    }
-
-    public List<ApprovalRequest> getRequestsByRequester(Long requesterId) {
-        return repository.findByRequesterId(requesterId);
+        return requestRepository.findAll();
     }
 }

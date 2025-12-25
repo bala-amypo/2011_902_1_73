@@ -4,23 +4,26 @@ import com.example.demo.model.WorkflowStepConfig;
 import com.example.demo.repository.WorkflowStepConfigRepository;
 import com.example.demo.service.WorkflowStepConfigService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class WorkflowStepConfigServiceImpl implements WorkflowStepConfigService {
+    private final WorkflowStepConfigRepository stepRepository;
 
-    private final WorkflowStepConfigRepository repository;
-
-    public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository repository) {
-        this.repository = repository;
+    public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository stepRepository) {
+        this.stepRepository = stepRepository;
     }
 
+    @Override
     public WorkflowStepConfig createStep(WorkflowStepConfig step) {
-        return repository.save(step);
+        return stepRepository.save(step);
     }
 
+    @Override
     public List<WorkflowStepConfig> getStepsForTemplate(Long templateId) {
-        return repository.findByTemplateIdOrderByLevelNumberAsc(templateId);
+        return stepRepository.findByTemplateIdOrderByLevelNumberAsc(templateId);
     }
 }
