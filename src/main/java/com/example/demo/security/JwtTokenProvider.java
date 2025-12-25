@@ -36,6 +36,15 @@ public class JwtTokenProvider {
         }
     }
 
+    public String getRolesFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            Object roles = claims.get("roles");
+            return roles != null ? roles.toString() : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
