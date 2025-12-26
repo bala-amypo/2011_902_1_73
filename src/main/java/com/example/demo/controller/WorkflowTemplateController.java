@@ -8,7 +8,7 @@
 // import java.util.List;
 
 // @RestController
-// @RequestMapping("/api/templates")
+// @RequestMapping("/api/templates")//
 // public class WorkflowTemplateController {
 
 //     private final WorkflowTemplateService templateService;
@@ -40,4 +40,4 @@
 //     public ResponseEntity<List<WorkflowTemplate>> listAll() {
 //         return ResponseEntity.ok(templateService.getAllTemplates());
 //     }
-}
+// }//
