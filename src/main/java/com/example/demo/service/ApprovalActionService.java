@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.model.ApprovalAction;
+import org.springframework.stereotype.Service;
 
-public interface ApprovalActionService {
-    ApprovalAction recordAction(ApprovalAction action);
+@Service
+public class ApprovalActionService {
 }

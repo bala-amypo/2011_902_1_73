@@ -1,29 +1,29 @@
-package com.example.demo.service.impl;
+// package com.example.demo.service.impl;
 
-import com.example.demo.model.WorkflowStepConfig;
-import com.example.demo.repository.WorkflowStepConfigRepository;
-import com.example.demo.service.WorkflowStepConfigService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+// import com.example.demo.model.WorkflowStepConfig;
+// import com.example.demo.repository.WorkflowStepConfigRepository;
+// import com.example.demo.service.WorkflowStepConfigService;
+// import org.springframework.stereotype.Service;
+// import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+// import java.util.List;
 
-@Service
-@Transactional
-public class WorkflowStepConfigServiceImpl implements WorkflowStepConfigService {
-    private final WorkflowStepConfigRepository stepRepository;
+// @Service
+// @Transactional
+// public class WorkflowStepConfigServiceImpl implements WorkflowStepConfigService {
+//     private final WorkflowStepConfigRepository stepRepository;
 
-    public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository stepRepository) {
-        this.stepRepository = stepRepository;
-    }
+//     public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository stepRepository) {
+//         this.stepRepository = stepRepository;
+//     }
 
-    @Override
-    public WorkflowStepConfig createStep(WorkflowStepConfig step) {
-        return stepRepository.save(step);
-    }
+//     @Override
+//     public WorkflowStepConfig createStep(WorkflowStepConfig step) {
+//         return stepRepository.save(step);
+//     }
 
-    @Override
-    public List<WorkflowStepConfig> getStepsForTemplate(Long templateId) {
-        return stepRepository.findByTemplateIdOrderByLevelNumberAsc(templateId);
-    }
-}
+//     @Override
+//     public List<WorkflowStepConfig> getStepsForTemplate(Long templateId) {
+//         return stepRepository.findByTemplateIdOrderByLevelNumberAsc(templateId);
+//     }
+// }//
