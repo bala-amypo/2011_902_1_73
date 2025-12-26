@@ -1,6 +1,6 @@
-package com.example.demo.exception;
+// package com.example.demo.exception;
 
-public class UnauthorizedException extends RuntimeException {
-    public UnauthorizedException() { super(); }
-    public UnauthorizedException(String msg) { super(msg); }
-}
+// public class UnauthorizedException extends RuntimeException {
+//     public UnauthorizedException() { super(); }
+//     public UnauthorizedException(String msg) { super(msg); }
+// }//
