@@ -1,29 +1,28 @@
-// package com.example.demo.service.impl;
+package com.example.demo.service.impl;
 
-// import com.example.demo.model.WorkflowStepConfig;
-// import com.example.demo.repository.WorkflowStepConfigRepository;
-// import com.example.demo.service.WorkflowStepConfigService;
-// import org.springframework.stereotype.Service;
-// import org.springframework.transaction.annotation.Transactional;
+import com.example.demo.model.WorkflowStepConfig;
+import com.example.demo.repository.WorkflowStepConfigRepository;
+import com.example.demo.service.WorkflowStepConfigService;
+import org.springframework.stereotype.Service;
 
-// import java.util.List;
+import java.util.List;
 
-// @Service
-// @Transactional
-// public class WorkflowStepConfigServiceImpl implements WorkflowStepConfigService {
-//     private final WorkflowStepConfigRepository stepRepository;
+@Service
+public class WorkflowStepConfigServiceImpl implements WorkflowStepConfigService {
 
-//     public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository stepRepository) {
-//         this.stepRepository = stepRepository;
-//     }
+    private final WorkflowStepConfigRepository repository;
 
-//     @Override
-//     public WorkflowStepConfig createStep(WorkflowStepConfig step) {
-//         return stepRepository.save(step);
-//     }
+    public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository repository) {
+        this.repository = repository;
+    }
 
-//     @Override
-//     public List<WorkflowStepConfig> getStepsForTemplate(Long templateId) {
-//         return stepRepository.findByTemplateIdOrderByLevelNumberAsc(templateId);
-//     }
-// }//
+    @Override
+    public WorkflowStepConfig createStep(WorkflowStepConfig step) {
+        return repository.save(step);
+    }
+
+    @Override
+    public List<WorkflowStepConfig> getStepsForTemplate(Long templateId) {
+        return repository.findByTemplateIdOrderByLevelNumberAsc(templateId);
+    }
+}

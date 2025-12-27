@@ -1,7 +1,11 @@
 package com.example.demo.service;
 
-import org.springframework.stereotype.Service;
+import com.example.demo.model.WorkflowStepConfig;
+import java.util.List;
 
-@Service
-public class WorkflowStepConfigService {
+public interface WorkflowStepConfigService {
+
+    WorkflowStepConfig createStep(WorkflowStepConfig step);
+
+    List<WorkflowStepConfig> getStepsForTemplate(Long templateId);
 }
