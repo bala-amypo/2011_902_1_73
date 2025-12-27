@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -19,15 +21,17 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // ===== Constructors =====
-    public User() {
-    }
+    // ✅ ROLES (THIS FIXES YOUR ERROR)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
-    public User(String username, String password, String email) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-    }
+    // ===== Constructors =====
+    public User() {}
 
     // ===== Getters & Setters =====
     public Long getId() {
@@ -46,12 +50,20 @@ public class User {
         this.id = id;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getPassword() {
         return password;
+    }
+
+    public Set<Role> getRoles() {   // ✅ REQUIRED
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) { // ✅ REQUIRED
+        this.roles = roles;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {

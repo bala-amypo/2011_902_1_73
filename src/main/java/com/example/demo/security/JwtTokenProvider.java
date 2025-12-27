@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import com.example.demo.model.Role;
 import com.example.demo.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -8,28 +9,32 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
 
-    // ✅ Base64-encoded secret key (SAFE)
     private static final String SECRET_KEY =
             "bXlzZWNyZXRrZXlteXNlY3JldGtleW15c2VjcmV0a2V5";
 
-    private static final long EXPIRATION_TIME = 86400000; // 1 day
+    private static final long EXPIRATION_TIME = 86400000;
 
-    // ===== Signing Key =====
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // ===== Generate JWT =====
+    // ✅ Generate JWT with roles
     public String generateToken(User user) {
+        List<String> roles = user.getRoles()
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
+
         return Jwts.builder()
                 .setSubject(user.getUsername())
+                .claim("roles", roles)
                 .claim("userId", user.getId())
                 .claim("email", user.getEmail())
                 .setIssuedAt(new Date())
@@ -38,7 +43,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // ===== Validate JWT =====
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -46,12 +50,11 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException e) {
             return false;
         }
     }
 
-    // ===== Get Username =====
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -61,8 +64,17 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
-    // ===== No Roles (Return Empty List) =====
     public List<SimpleGrantedAuthority> getRolesFromToken(String token) {
-        return List.of();
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        List<String> roles = claims.get("roles", List.class);
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 }
