@@ -7,19 +7,22 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
     public JwtAuthenticationFilter(
             JwtTokenProvider tokenProvider,
-            CustomUserDetailsService userDetailsService
+            UserDetailsService userDetailsService
     ) {
         this.tokenProvider = tokenProvider;
         this.userDetailsService = userDetailsService;
@@ -32,14 +35,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String header = request.getHeader(SecurityConstants.HEADER_STRING);
+        String header = request.getHeader("Authorization");
 
-        if (header != null && header.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            String token = header.replace(SecurityConstants.TOKEN_PREFIX, "");
+        if (header != null && header.startsWith("Bearer ")) {
+
+            String token = header.substring(7);
 
             if (tokenProvider.validateToken(token)) {
-                String username = tokenProvider.getUsernameFromToken(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                String username =
+                        tokenProvider.getUsernameFromToken(token);
+
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -49,10 +57,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         );
 
                 authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
                 );
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authentication);
             }
         }
 

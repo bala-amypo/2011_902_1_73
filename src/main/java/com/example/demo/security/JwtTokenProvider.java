@@ -8,40 +8,47 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
 
-    // MUST be at least 32 chars for HS256
+    // Minimum 32 characters for HS256
     private static final String JWT_SECRET =
             "my-super-secure-jwt-secret-key-123456";
 
-    private static final long JWT_EXPIRATION = 24 * 60 * 60 * 1000; // 1 day
+    private static final long JWT_EXPIRATION =
+            24 * 60 * 60 * 1000; // 1 day
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(
+                JWT_SECRET.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
+    // ✅ Generate JWT
     public String generateToken(User user) {
+
+        List<String> roles = user.getRoles()
+                .stream()
+                .map(role -> role.getName())
+                .collect(Collectors.toList());
 
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim("userId", user.getId())
                 .claim("email", user.getEmail())
-                .claim(
-                        "roles",
-                        user.getRoles()
-                                .stream()
-                                .map(r -> r.getName())
-                                .collect(Collectors.toList())
-                )
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + JWT_EXPIRATION)
+                )
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // ✅ Validate JWT
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -54,11 +61,17 @@ public class JwtTokenProvider {
         }
     }
 
+    // ✅ Extract Claims
     public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    // ✅ REQUIRED by JwtAuthenticationFilter
+    public String getUsernameFromToken(String token) {
+        return getClaims(token).getSubject();
     }
 }
