@@ -1,7 +1,11 @@
 package com.example.demo.service;
 
-import org.springframework.stereotype.Service;
+import com.example.demo.model.AuditLogRecord;
+import java.util.List;
 
-@Service
-public class AuditLogService {
+public interface AuditLogService {
+
+    AuditLogRecord logEvent(Long requestId, String eventType, String details);
+
+    List<AuditLogRecord> getLogsByRequestId(Long requestId);
 }
