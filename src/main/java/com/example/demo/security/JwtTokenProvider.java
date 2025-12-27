@@ -1,37 +1,59 @@
 package com.example.demo.security;
 
-import com.example.demo.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+
+import java.security.Key;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final String SECRET_KEY = "mysecretkeymysecretkeymysecretkey123";
+    private final long EXPIRATION = 86400000; // 1 day
 
-    public String generateToken(User user) {
-        return "uid:" + user.getId()
-                + ":uname:" + user.getUsername()
-                + ":email:" + user.getEmail();
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public Long getUserIdFromToken(String token) {
-        // token parts: [0]=uid, [1]=<id>, [2]=uname, [3]=<username>, [4]=email, [5]=<email>
-        String[] parts = token.split(":");
-        if (parts.length < 2 || !"uid".equals(parts[0])) {
-            throw new IllegalArgumentException("Invalid token");
-        }
-        return Long.parseLong(parts[1]);
-    }
-
+    // ✅ Validate token
     public boolean validateToken(String token) {
         try {
-            Long id = getUserIdFromToken(token);
-            return id != null && id > 0;
-        } catch (Exception e) {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    // ✅ Extract username
+    public String getUsernameFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    // ✅ REQUIRED METHOD (THIS FIXES YOUR ERROR)
+    public List<SimpleGrantedAuthority> getRolesFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        List<String> roles = claims.get("roles", List.class);
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 }
