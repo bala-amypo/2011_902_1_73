@@ -10,19 +10,20 @@ import java.util.List;
 @Service
 public class WorkflowStepConfigServiceImpl implements WorkflowStepConfigService {
 
-    private final WorkflowStepConfigRepository repository;
+    private final WorkflowStepConfigRepository workflowStepConfigRepository;
 
-    public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository repository) {
-        this.repository = repository;
+    public WorkflowStepConfigServiceImpl(WorkflowStepConfigRepository workflowStepConfigRepository) {
+        this.workflowStepConfigRepository = workflowStepConfigRepository;
     }
 
     @Override
     public WorkflowStepConfig createStep(WorkflowStepConfig step) {
-        return repository.save(step);
+        return workflowStepConfigRepository.save(step);
     }
 
     @Override
     public List<WorkflowStepConfig> getStepsForTemplate(Long templateId) {
-        return repository.findByTemplateIdOrderByLevelNumberAsc(templateId);
+        return workflowStepConfigRepository
+                .findByTemplateIdOrderByLevelNumberAsc(templateId);
     }
 }

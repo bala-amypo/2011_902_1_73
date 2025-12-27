@@ -1,22 +1,32 @@
-// package com.example.demo.service.impl;
+package com.example.demo.service.impl;
 
-// import com.example.demo.model.ApprovalAction;
-// import com.example.demo.repository.ApprovalActionRepository;
-// import com.example.demo.service.ApprovalActionService;
-// import org.springframework.stereotype.Service;
-// import org.springframework.transaction.annotation.Transactional;
+import com.example.demo.model.ApprovalAction;
+import com.example.demo.model.ApprovalRequest;
+import com.example.demo.repository.ApprovalActionRepository;
+import com.example.demo.repository.ApprovalRequestRepository;
+import com.example.demo.service.ApprovalActionService;
+import com.example.demo.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
 
-// @Service
-// @Transactional
-// public class ApprovalActionServiceImpl implements ApprovalActionService {
-//     private final ApprovalActionRepository actionRepository;
+@Service
+public class ApprovalActionServiceImpl implements ApprovalActionService {
 
-//     public ApprovalActionServiceImpl(ApprovalActionRepository actionRepository) {
-//         this.actionRepository = actionRepository;
-//     }
+    private final ApprovalActionRepository approvalActionRepository;
+    private final ApprovalRequestRepository approvalRequestRepository;
 
-//     @Override
-//     public ApprovalAction recordAction(ApprovalAction action) {
-//         return actionRepository.save(action);
-//     }
-// }//
+    public ApprovalActionServiceImpl(
+            ApprovalActionRepository approvalActionRepository,
+            ApprovalRequestRepository approvalRequestRepository
+    ) {
+        this.approvalActionRepository = approvalActionRepository;
+        this.approvalRequestRepository = approvalRequestRepository;
+    }
+
+    @Override
+    public ApprovalAction recordAction(ApprovalAction action) {
+        ApprovalRequest request = approvalRequestRepository.findById(action.getRequestId())
+                .orElseThrow(() -> new ResourceNotFoundException("ApprovalRequest not found"));
+
+        return approvalActionRepository.save(action);
+    }
+}
