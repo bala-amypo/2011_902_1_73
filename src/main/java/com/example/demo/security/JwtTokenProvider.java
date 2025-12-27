@@ -14,12 +14,11 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    // Minimum 32 characters for HS256
     private static final String JWT_SECRET =
             "my-super-secure-jwt-secret-key-123456";
 
     private static final long JWT_EXPIRATION =
-            24 * 60 * 60 * 1000; // 1 day
+            24 * 60 * 60 * 1000;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(
@@ -27,7 +26,7 @@ public class JwtTokenProvider {
         );
     }
 
-    // ✅ Generate JWT
+    // ✅ Generate Token
     public String generateToken(User user) {
 
         List<String> roles = user.getRoles()
@@ -48,7 +47,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // ✅ Validate JWT
+    // ✅ Validate Token
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -61,7 +60,7 @@ public class JwtTokenProvider {
         }
     }
 
-    // ✅ Extract Claims
+    // ✅ Extract All Claims
     public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -70,8 +69,14 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
-    // ✅ REQUIRED by JwtAuthenticationFilter
+    // ✅ Required by JwtAuthenticationFilter
     public String getUsernameFromToken(String token) {
         return getClaims(token).getSubject();
+    }
+
+    // ✅ REQUIRED by UserServiceTest
+    public Long getUserIdFromToken(String token) {
+        Object userId = getClaims(token).get("userId");
+        return userId != null ? Long.valueOf(userId.toString()) : null;
     }
 }
