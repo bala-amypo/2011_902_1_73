@@ -13,17 +13,24 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String name; // ROLE_USER, ROLE_ADMIN
 
-    public Role() {}
+    public Role() {
+    }
 
     public Role(String name) {
         this.name = name;
     }
 
+    // ===== Getters =====
     public Long getId() {
         return id;
     }
 
     public String getName() {
         return name;
+    }
+
+    // ✅ ADD THIS (FIXES TEST ERRORS)
+    public void setName(String name) {
+        this.name = name;
     }
 }
