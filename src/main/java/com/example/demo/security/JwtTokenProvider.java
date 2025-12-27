@@ -2,59 +2,70 @@ package com.example.demo.security;
 
 import com.example.demo.model.User;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.security.Key;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "amypo-secret-key";
-    private final long jwtExpirationMs = 3600000; // 1 hour
+    private static final String SECRET_KEY =
+            "bXlzZWNyZXRrZXlteXNlY3JldGtleW15c2VjcmV0a2V5";
+
+    private static final long EXPIRATION_TIME = 86400000; // 1 day
+
+    private Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
 
     public String generateToken(User user) {
-
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("userId", user.getId())
-                .claim("email", user.getEmail())
-                .claim(
-                    "roles",
-                    user.getRoles()
-                        .stream()
-                        .map(Role -> Role.getName())
-                        .collect(Collectors.toList())
-                )
+                .claim("roles", List.of(user.getRole()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public String getUsernameFromToken(String token) {
-        return parseClaims(token).getSubject();
-    }
-
-   
-    public Long getUserIdFromToken(String token) {
-        Object value = parseClaims(token).get("userId");
-        return value == null ? null : Long.valueOf(value.toString());
     }
 
     public boolean validateToken(String token) {
         try {
-            parseClaims(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException e) {
             return false;
         }
     }
 
-    private Claims parseClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtSecret)
+    public String getUsernameFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    public List<SimpleGrantedAuthority> getRolesFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
+
+        List<String> roles = claims.get("roles", List.class);
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 }
