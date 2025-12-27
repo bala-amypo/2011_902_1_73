@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import com.example.demo.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,14 +13,30 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    private final String SECRET_KEY = "mysecretkeymysecretkeymysecretkey123";
-    private final long EXPIRATION = 86400000; // 1 day
+    private static final String SECRET_KEY =
+            "mysecretkeymysecretkeymysecretkeymysecretkey12345";
+
+    private static final long EXPIRATION_TIME = 86400000; // 1 day
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    // ✅ Validate token
+    // ✅ GENERATE TOKEN (THIS FIXES AuthController ERROR)
+    public String generateToken(User user) {
+        List<String> roles = new ArrayList<>();
+        roles.add(user.getRole()); // assuming user has getRole()
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("roles", roles)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // ✅ VALIDATE TOKEN
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -32,7 +49,7 @@ public class JwtTokenProvider {
         }
     }
 
-    // ✅ Extract username
+    // ✅ GET USERNAME
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -42,7 +59,7 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
-    // ✅ REQUIRED METHOD (THIS FIXES YOUR ERROR)
+    // ✅ GET ROLES
     public List<SimpleGrantedAuthority> getRolesFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
